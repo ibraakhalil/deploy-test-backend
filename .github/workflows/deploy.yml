@@ -10,10 +10,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Download SQLite database from S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          S3_DB_FILE_PATH: ${{ secrets.S3_DB_FILE_PATH }}
+        run: |
+          aws s3 cp s3://$S3_BUCKET_NAME/$S3_DB_FILE_PATH ./database/quran_main.db
+
       - name: Install dependencies
         run: npm install
 
-      - name: Build the project
+      - name: Build the project (if needed)
         run: npm run build
 
       - name: Zip the project (excluding node_modules)
