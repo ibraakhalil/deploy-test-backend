@@ -1,12 +1,46 @@
-name: quran-backend-deploy
+name: Deploy Express.js App to EC2
 
 on: workflow_dispatch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: check vm
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Zip the project (excluding node_modules)
         run: |
-          free -h
-          node -v
+          zip -r app.zip . -x "node_modules/*" ".git/*" ".github/*"
+
+      - name: Copy the zip file to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_KEY: ${{ secrets.EC2_KEY }}
+        run: |
+          echo "$EC2_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem app.zip $EC2_USER@$EC2_HOST:/home/ubuntu/app.zip
+
+      - name: Unzip and set up on EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_KEY: ${{ secrets.EC2_KEY }}
+        run: |
+          echo "$EC2_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+          ssh -o StrictHostKeyChecking=no -i deploy_key.pem $EC2_USER@$EC2_HOST "
+            cd /home/ubuntu &&
+            unzip -o app.zip -d app &&
+            cd app &&
+            npm install --production
+          "
