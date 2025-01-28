@@ -28,6 +28,7 @@ jobs:
       - name: Zip the project (excluding node_modules)
         run: |
           zip -r app.zip . -x "node_modules/*" ".git/*" ".github/*"
+          ls -l app.zip
 
       - name: Copy the zip file to EC2
         env:
