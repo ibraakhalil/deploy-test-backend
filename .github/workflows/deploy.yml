@@ -7,4 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: check vm
-        run: free -h
+        run: |
+          free -h
+          node -v
