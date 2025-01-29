@@ -28,7 +28,7 @@ jobs:
       - name: Zip the project (excluding node_modules)
         run: |
           zip -r app.zip . -x "node_modules/*" ".git/*" ".github/*"
-          ls -l app.zip
+          ls -l app.zip -h
 
       - name: Copy the zip file to EC2
         env:
@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "$EC2_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
-          scp -o StrictHostKeyChecking=no -o Compression=yes -o ControlMaster=auto -o ControlPersist=5m -i deploy_key.pem app.zip $EC2_USER@$EC2_HOST:/home/ubuntu/app.zip
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i deploy_key.pem" app.zip $EC2_USER@$EC2_HOST:/home/ubuntu/
 
       - name: Unzip and set up on EC2
         env:
