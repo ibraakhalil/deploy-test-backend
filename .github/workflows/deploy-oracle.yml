@@ -42,4 +42,6 @@ jobs:
             unzip -o /var/www/quran-mazid/backend/app.zip
             cd /var/www/quran-mazid/backend
             npm install --production
+            mkdir -p /var/www/quran-mazid/backend/build/database
+            cp /var/www/quran-mazid/database/quran_main.db /var/www/quran-mazid/backend/build/database/quran_main.db
           EOF
