@@ -1,0 +1,44 @@
+name: Deploy Backend to Oracle Cloud
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Zip the project (excluding node_modules)
+        run: |
+          zip -r app.zip . -x "node_modules/*" "database/*" ".git/*" ".github/*"
+          ls -l app.zip -h
+
+      - name: Copy the zip file to Oracle Cloud
+        env:
+          OCI_HOST: ${{ secrets.OCI_HOST }}
+          OCI_KEY: ${{ secrets.OCI_KEY }}
+        run: |
+          echo "$OCI_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+          rsync -avz --progress --info=progress2 -e "ssh -o StrictHostKeyChecking=no -i deploy_key.pem" app.zip ubuntu@$OCI_HOST:/var/www/quran-mazid/backend
+
+      - name: SSH into Oracle Cloud and deploy
+        env:
+          OCI_HOST: ${{ secrets.OCI_HOST }}
+          OCI_KEY: ${{ secrets.OCI_KEY }}
+        run: |
+          echo "$OCI_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+          ssh -o StrictHostKeyChecking=no -i deploy_key.pem ubuntu@$OCI_HOST << 'EOF'
+            unzip -o /var/www/quran-mazid/backend/app.zip
+            cd /var/www/quran-mazid/backend
+            npm install --production
+          EOF
