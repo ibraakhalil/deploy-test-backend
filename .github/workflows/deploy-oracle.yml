@@ -38,8 +38,6 @@ jobs:
           echo "$OCI_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
           ssh -o StrictHostKeyChecking=no -i deploy_key.pem ubuntu@$OCI_HOST << 'EOF'
-            rm -rf /var/www/quran-mazid/backend/*
-            mkdir -p /var/www/quran-mazid/nice-&-ok
             cd /var/www/quran-mazid/backend
             unzip -o /var/www/quran-mazid/backend/app.zip
             cd /var/www/quran-mazid/backend
