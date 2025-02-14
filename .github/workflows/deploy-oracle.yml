@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "$OCI_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
-          rsync -avz --progress --info=progress2 -e "ssh -o StrictHostKeyChecking=no -i deploy_key.pem" app.zip ubuntu@$OCI_HOST:/var/www/quran-mazid/backend
+          rsync -avz --progress --info=progress2 -e "ssh -o StrictHostKeyChecking=no -i deploy_key.pem" app.zip ubuntu@$OCI_HOST:/var/www/quran-mazid/backend/
 
       - name: SSH into Oracle Cloud and deploy
         env:
@@ -38,6 +38,7 @@ jobs:
           echo "$OCI_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
           ssh -o StrictHostKeyChecking=no -i deploy_key.pem ubuntu@$OCI_HOST << 'EOF'
+            cd /var/www/quran-mazid/backend
             unzip -o /var/www/quran-mazid/backend/app.zip
             cd /var/www/quran-mazid/backend
             npm install --production
